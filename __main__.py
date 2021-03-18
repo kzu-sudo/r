@@ -20,7 +20,6 @@ def attack():
 #vedi vidi vici
 if __name__ == '__main__':
     result = []
-    list_of = []
     result = p.parse_arguments()
     a = start_attack(result["host"], result["port"])
     attack()
