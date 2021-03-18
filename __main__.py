@@ -17,7 +17,7 @@ def attack():
         list_of_sockets.append(s)
 
 
-#vedi vidi vici
+#veni vidi vici
 if __name__ == '__main__':
     result = []
     result = p.parse_arguments()
