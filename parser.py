@@ -18,10 +18,6 @@ class Parser(object):
             "-c", "--connection-count", default=247, action="store",
             help="count of active connections (default = 247)"
         )
-        parser.add_argument(
-            "-p", "--port", default=80, action='store_true',
-            help="specify the port of the server you want to attack",
-        )
 
         args = parser.parse_args()
         return_value = {}
@@ -31,6 +27,5 @@ class Parser(object):
             parser.print_help()
             SystemExit
         return_value["connection_count"] = args.connection_count
-        return_value["port"] = args.port
         return return_value
 
