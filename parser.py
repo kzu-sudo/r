@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import argparse
 
 class Parser(object):
@@ -10,12 +11,12 @@ class Parser(object):
             description="This is a script to perform a slowloris attack"
         )
         parser.add_argument(
-            "-r", "--host", action="store", type=str, required=False,
-            help="specify the host of the target server"
+            "-u", "--url", action="store", type=str, required=False,
+            help="specify the url of the target server"
         )
         parser.add_argument(
             "-c", "--connection-count", default=247, action="store",
-            help="count of active connections (default = 247"
+            help="count of active connections (default = 247)"
         )
         parser.add_argument(
             "-p", "--port", default=80, action='store_true',
@@ -25,12 +26,11 @@ class Parser(object):
         args = parser.parse_args()
         return_value = {}
         try:
-            return_value["host"] = args.host
+            return_value["url"] = args.url
         except:
             parser.print_help()
             SystemExit
         return_value["connection_count"] = args.connection_count
         return_value["port"] = args.port
         return return_value
-
 
