@@ -22,11 +22,18 @@ def attack(m):
 if __name__ == '__main__':
     result = []
     result = p.parse_arguments()
+
     a = start_attack()
     m = a.form_url(result["url"])
-    m.create_fake_useragent()
-    m.prepare_for_sending()
+    m.fake_agent = m.create_fake_useragent()
+    if result["proxy"]:
+        m.path = result["url"]
+        m.socket_ip = result["proxyhost"]
+        m.socket_port = result["proxyport"]
+        m.p = True
+    m.prepare_for_sending(m)
     attack(m)
+
 
 
 
